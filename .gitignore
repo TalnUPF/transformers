@@ -139,3 +139,6 @@ serialization_dir
 # emacs
 *.*~
 debug.env
+
+lpmayos_experiments/tests_runs_v1.1/*
+lpmayos_experiments/tests_runs_v2.0/*
