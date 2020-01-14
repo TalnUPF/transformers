@@ -21,7 +21,7 @@ python ../../examples/run_squad.py --model_type bert \
                                 --train_file $SQUAD_DIR/train-v2.0.json \
                                 --predict_file $SQUAD_DIR/dev-v2.0.json \
                                 --learning_rate 3e-5 \
-                                --num_train_epochs 2 \
+                                --num_train_epochs 20 \
                                 --max_seq_length 384 \
                                 --doc_stride 128 \
                                 --output_dir $OUTPUT_DIR/ \
