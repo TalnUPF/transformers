@@ -2,7 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
-import os
+from conllu import parse_incr
 from io import open
 
 logger = logging.getLogger(__name__)
@@ -25,24 +25,18 @@ class InputFeatures(object):
         self.label_ids = label_ids
 
 
-def read_examples_from_file(data_dir, mode):
-    file_path = os.path.join(data_dir, "{}.txt".format(mode))
+def read_examples_from_file(file_path, mode):
     guid_index = 1
     examples = []
     with open(file_path, encoding="utf-8") as f:
-        words = []
-        labels = []
-        for line in f.readlines():
-            inputs = line.strip().strip("\n").split("\t")
-            left = inputs[0].strip().split()
-            right = inputs[1].strip().split()
 
-            words = left
-            labels = right
-            assert len(words) == len(labels)
-            examples.append(InputExample(guid="%s-%d".format(mode, guid_index),
-                                         words=words,
-                                         labels=labels))
+        for tokenlist in parse_incr(f):
+
+            words = [a['form'] for a in tokenlist]
+            labels = [a['upostag'] for a in tokenlist]
+            examples.append(InputExample(guid="%s-%d".format(mode, guid_index), words=words, labels=labels))
+            guid_index += 1
+
     return examples
 
 

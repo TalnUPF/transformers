@@ -24,6 +24,8 @@ from transformers import WEIGHTS_NAME, BertConfig, BertForTokenClassification, B
 from transformers import RobertaConfig, RobertaForTokenClassification, RobertaTokenizer
 from transformers import DistilBertConfig, DistilBertForTokenClassification, DistilBertTokenizer
 
+from conllu import parse_incr
+
 logger = logging.getLogger(__name__)
 
 ALL_MODELS = sum(
@@ -264,8 +266,18 @@ def load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode):
         logger.info("Loading features from cached file %s", cached_features_file)
         features = torch.load(cached_features_file)
     else:
-        logger.info("Creating features from dataset file at %s", args.data_dir)
-        examples = read_examples_from_file(args.data_dir, mode)
+
+        if mode == 'train':
+            file_path = args.train_file
+        elif mode == 'dev':
+            file_path = args.dev_file
+        elif mode == 'test':
+            file_path = args.test_file
+
+        logger.info("Creating features from dataset file at %s", file_path)
+
+        examples = read_examples_from_file(file_path, mode)
+
         features = convert_examples_to_features(examples, labels, args.max_seq_length, tokenizer,
                                                 cls_token_at_end=bool(args.model_type in ["xlnet"]),
                                                 # xlnet has a cls token at the end
@@ -302,7 +314,14 @@ def main():
 
     ## Required parameters
     parser.add_argument("--data_dir", default=None, type=str, required=True,
-                        help="The input data dir. Should contain the training files for the CoNLL-2003 NER task.")
+                        help="The input data dir, i.e. ~/datasets/ud2.1/ud-treebanks-v2.1/UD_English")
+    parser.add_argument("--train_file", default=None, type=str, required=True,
+                        help="i.e. ~/datasets/ud2.1/ud-treebanks-v2.1/UD_English/en-ud-train.conllu")
+    parser.add_argument("--dev_file", default=None, type=str, required=True,
+                        help="i.e. ~/datasets/ud2.1/ud-treebanks-v2.1/UD_English/en-ud-dev.conllu")
+    parser.add_argument("--test_file", default=None, type=str, required=True,
+                        help="i.e. ~/datasets/ud2.1/ud-treebanks-v2.1/UD_English/en-ud-test.conllu")
+
     parser.add_argument("--model_type", default=None, type=str, required=True,
                         help="Model type selected in the list: " + ", ".join(MODEL_CLASSES.keys()))
     parser.add_argument("--model_name_or_path", default=None, type=str, required=True,
@@ -503,21 +522,21 @@ def main():
         with open(output_test_results_file, "w") as writer:
             for key in sorted(result.keys()):
                 writer.write("{} = {}\n".format(key, str(result[key])))
+
         # Save predictions
         output_test_predictions_file = os.path.join(args.output_dir, "test_predictions.txt")
         with open(output_test_predictions_file, "w") as writer:
-            with open(os.path.join(args.data_dir, "test.txt"), "r") as f:
-                example_id = 0
-                for line in f:
-                    if line.startswith("-DOCSTART-") or line == "" or line == "\n":
-                        writer.write(line)
-                        if not predictions[example_id]:
-                            example_id += 1
-                    elif predictions[example_id]:
-                        output_line = line.split()[0] + " " + predictions[example_id].pop(0) + "\n"
-                        writer.write(output_line)
+            with open(args.test_file, "r") as f:
+
+                for example_id, tokenlist in enumerate(parse_incr(f)):
+
+                    if predictions[example_id]:
+                        for i, token in enumerate(tokenlist):
+                            token['upostag'] = predictions[example_id][i]
+                            token['xpostag'] = '_'
+                        writer.write(tokenlist.serialize())
                     else:
-                        logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
+                        logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", example_id)
 
     return results
 
