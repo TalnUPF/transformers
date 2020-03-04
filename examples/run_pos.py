@@ -117,7 +117,7 @@ def train(args, train_dataset, model, tokenizer, labels, pad_token_label_id):
                 inputs["token_type_ids"]: batch[2] if args.model_type in ["bert",
                                                                           "xlnet"] else None  # XLM and RoBERTa don"t use segment_ids
 
-            outputs = model(**inputs)
+            outputs = model(**inputs)  # forward pass
             loss = outputs[0]  # model outputs are always tuple in pytorch-transformers (see doc)
 
             if args.n_gpu > 1:
@@ -398,6 +398,7 @@ def main():
                         help="For distributed training: local_rank")
     parser.add_argument("--server_ip", type=str, default="", help="For distant debugging.")
     parser.add_argument("--server_port", type=str, default="", help="For distant debugging.")
+    parser.add_argument("--checkpoint_zero", action="store_true", help="Whether we are just evaluating a pretrained_model for checkpoint 0.")
     args = parser.parse_args()
 
     if os.path.exists(args.output_dir) and os.listdir(
@@ -513,8 +514,23 @@ def main():
                 writer.write("{} = {}\n".format(key, str(results[key])))
 
     if args.do_predict and args.local_rank in [-1, 0]:
-        tokenizer = tokenizer_class.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case)
-        model = model_class.from_pretrained(args.output_dir)
+
+        if args.checkpoint_zero:
+            tokenizer = tokenizer_class.from_pretrained(
+                 args.tokenizer_name if args.tokenizer_name else args.model_name_or_path,
+                 do_lower_case = args.do_lower_case,
+                 cache_dir = args.cache_dir if args.cache_dir else None,
+            )
+            model = model_class.from_pretrained(
+                args.model_name_or_path,
+                from_tf = bool(".ckpt" in args.model_name_or_path),
+                config = config,
+                cache_dir = args.cache_dir if args.cache_dir else None,
+            )
+        else:
+            tokenizer = tokenizer_class.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case)
+            model = model_class.from_pretrained(args.output_dir)
+
         model.to(args.device)
         result, predictions = evaluate(args, model, tokenizer, labels, pad_token_label_id, mode="test")
         # Save results
