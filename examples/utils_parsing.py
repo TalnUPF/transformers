@@ -48,17 +48,15 @@ def read_examples_from_file(file_path, mode):
 
         for tokenlist in parse_incr(f):
 
-            # remove UD tokens with '.' on id  # TODO lpmayos document better
+            # remove sentences containing tokens with '.' on id  # TODO lpmayos document better
             drop_positions = [i for i, a in enumerate(tokenlist) if type(a['id']) == tuple]
-            for position in drop_positions:
-                logger.info('Dropped token %s' % tokenlist[position])
-                tokenlist.pop(position)
+            if len(drop_positions) == 0:
 
-            words = [a['form'] for a in tokenlist]
-            heads = [a['head'] for a in tokenlist]
-            labels = [a['deprel'] for a in tokenlist]
-            examples.append(InputExample(guid="%s-%d".format(mode, guid_index), words=words, heads=heads, labels=labels))
-            guid_index += 1
+                words = [a['form'] for a in tokenlist]
+                heads = [a['head'] for a in tokenlist]
+                labels = [a['deprel'] for a in tokenlist]
+                examples.append(InputExample(guid="%s-%d".format(mode, guid_index), words=words, heads=heads, labels=labels))
+                guid_index += 1
 
     return examples
 
