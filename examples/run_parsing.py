@@ -24,7 +24,7 @@ from transformers import WEIGHTS_NAME, BertConfig, BertTokenizer
 from transformers import RobertaConfig, RobertaForTokenClassification, RobertaTokenizer
 from transformers import DistilBertConfig, DistilBertForTokenClassification, DistilBertTokenizer
 
-from examples.modeling_bert import BertForParsing
+from modeling_bert import BertForParsing
 
 logger = logging.getLogger(__name__)
 
