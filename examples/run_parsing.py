@@ -572,7 +572,7 @@ def main():
             model = model_class.from_pretrained(
                 args.model_name_or_path,
                 mlp_dim=args.mlp_dim,
-                from_tf=bool(".ckpt" in checkpoint),
+                from_tf=bool(".ckpt" in args.model_name_or_path),
                 num_labels=num_labels,
                 config=config,
                 cache_dir=None
