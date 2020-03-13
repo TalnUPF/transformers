@@ -588,7 +588,7 @@ def main():
                                                 )
 
         model.to(args.device)
-        results, preds_label_list, preds_arc_list = evaluate(args, model, tokenizer, labels, pad_token_label_id, mode="test")
+        result, preds_label_list, preds_arc_list = evaluate(args, model, tokenizer, labels, pad_token_label_id, mode="test")
 
         # Save results
         output_test_results_file = os.path.join(args.output_dir, "test_results.txt")
