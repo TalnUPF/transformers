@@ -605,12 +605,8 @@ def main():
 
                     if preds_label_list[example_id]:
                         for i, token in enumerate(tokenlist):
-                            try:
-                                token['head'] = preds_label_list[example_id][i]
-                            except:
-                                print('Babau! example_id = %s; i = %s; preds_label_list = %s' % (example_id, i, preds_label_list))
-                                raise
-                            token['deprel'] = preds_arc_list[example_id][i]  # TODO lpmayos this is wrong!!
+                            token['head'] = preds_label_list[example_id][i]
+                            token['deprel'] = preds_arc_list[example_id][i]
                         writer.write(tokenlist.serialize())
                     else:
                         logger.warning("Maximum sequence length exceeded: No prediction for '%s'.", line.split()[0])
