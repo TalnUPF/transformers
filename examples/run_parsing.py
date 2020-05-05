@@ -477,8 +477,8 @@ def main():
     set_seed(args)
 
     # Prepare parsing task
-    args.labels = os.path.join(args.data_dir, "labels.txt")
-    labels = get_labels(args.labels.replace("\r", ""))
+    # args.labels = os.path.join(args.data_dir, "labels.txt")
+    labels = get_labels(args.labels)  # TODO lpmayos I fix path, as it was not using the one passed as parameter
     num_labels = len(labels)
     # Use cross entropy ignore index as padding label id so that only real label ids contribute to the loss later
     pad_token_label_id = CrossEntropyLoss().ignore_index
