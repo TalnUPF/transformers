@@ -295,11 +295,12 @@ def load_and_cache_examples(args, tokenizer, labels, pad_token_label_id, mode):
         torch.distributed.barrier()  # Make sure only the first process in distributed training process the dataset, and the others will use the cache
 
     # Load data features from cache or dataset file
-    cached_features_file = os.path.join(args.data_dir, "cached_{}_{}_{}_parsing".format(mode,
+    cached_features_file = os.path.join(args.data_dir, "cached_{}_{}_{}_{}_parsing".format(mode,
                                                                                 list(filter(None,
                                                                                             args.model_name_or_path.split(
                                                                                                 "/"))).pop(),
-                                                                                str(args.max_seq_length)))
+                                                                                str(args.max_seq_length),
+                                                                                args.dataset_nickname))
     if os.path.exists(cached_features_file) and not args.overwrite_cache:
         logger.info("Loading features from cached file %s", cached_features_file)
         features = torch.load(cached_features_file)
@@ -439,6 +440,8 @@ def main():
     parser.add_argument("--server_port", type=str, default="", help="For distant debugging.")
     parser.add_argument("--mlp_dim", type=int, default=200)
     parser.add_argument("--checkpoint_zero", action="store_true", help="Whether we are just evaluating a pretrained_model for checkpoint 0.")
+    parser.add_argument("--dataset_nickname", default=None, type=str, required=True,
+                        help="Name to use when storing cached features (to avoid conflicts between cached files from different datasets).")
     args = parser.parse_args()
 
     if os.path.exists(args.output_dir) and os.listdir(
