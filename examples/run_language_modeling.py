@@ -29,7 +29,6 @@ from typing import Optional
 from transformers import (
     CONFIG_MAPPING,
     AutoConfig,
-    AutoModelWithLMHead,
     AutoTokenizer,
     DataCollatorForLanguageModeling,
     HfArgumentParser,
@@ -41,7 +40,7 @@ from transformers import (
     set_seed,
 )
 
-from transformers.modeling_auto import MODEL_WITH_LM_HEAD_MAPPING
+from transformers.modeling_auto import MODEL_WITH_LM_HEAD_MAPPING, AutoModelWithLMHead
 
 logger = logging.getLogger(__name__)
 
