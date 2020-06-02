@@ -1,3 +1,6 @@
+# lpmayos note: this is the new version of the transformers mlm example, working only with the last transformers version installed from source available in the conda env transformers_new
+
+
 # coding=utf-8
 # Copyright 2018 The Google AI Language Team Authors and The HuggingFace Inc. team.
 # Copyright (c) 2018, NVIDIA CORPORATION.  All rights reserved.
@@ -19,8 +22,6 @@ GPT and GPT-2 are fine-tuned using a causal language modeling (CLM) loss while B
 using a masked language modeling (MLM) loss.
 """
 
-# lpmayos note: this is the new version of the transformers mlm example, working only with the last transformers version installed from source available in the conda env transformers_new
-
 import logging
 import math
 import os
@@ -36,13 +37,17 @@ from transformers import (
     LineByLineTextDataset,
     PreTrainedTokenizer,
     TextDataset,
-    Trainer,
+#    Trainer,
     TrainingArguments,
     set_seed,
     EvalPrediction,
 )
 
+from trainer_copy import Trainer
+
 from transformers.modeling_auto import MODEL_WITH_LM_HEAD_MAPPING, AutoModelWithLMHead
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -229,11 +234,15 @@ def main():
     def simple_accuracy(preds, labels):
        return (preds == labels).mean()
 
-    def compute_metrics_mlm(p: EvalPrediction) -> Dict:
-        print('babauuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu')
-        print(str(p))
-        preds = np.argmax(p.predictions, axis=1)
-        return {"acc": simple_accuracy(preds, p.label_ids)}
+    def compute_metrics_mlm(eval_pred: EvalPrediction) -> Dict:
+        import ipdb; ipdb.set_trace()
+        # ipdb > len(eval_pred.predictions)       7
+        # ipdb > len(eval_pred.predictions[0])    512
+        # ipdb > len(eval_pred.label_ids)         7
+        # ipdb > len(eval_pred.label_ids[0])      512
+
+        preds = np.argmax(eval_pred.predictions, axis=1)
+        return {"acc": simple_accuracy(preds, eval_pred.label_ids)}
 
     # Initialize our Trainer
     trainer = Trainer(
@@ -242,11 +251,10 @@ def main():
         data_collator=data_collator,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
-        prediction_loss_only=True,
+        prediction_loss_only=False,
         compute_metrics=compute_metrics_mlm,
     )
 
-    print('aaaaaaaaaaaa')
     print(trainer.compute_metrics)
 
     # Training
@@ -269,8 +277,6 @@ def main():
         logger.info("*** Evaluate ***")
 
         eval_output = trainer.evaluate()
-        print('babau2')
-        print('Eval output: ' + str(eval_output))
 
         perplexity = math.exp(eval_output["eval_loss"])
         result = {"perplexity": perplexity}
