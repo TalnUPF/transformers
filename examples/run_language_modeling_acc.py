@@ -235,7 +235,7 @@ def main():
        return (preds == labels).mean()
 
     def compute_metrics_mlm(eval_pred: EvalPrediction) -> Dict:
-        import ipdb; ipdb.set_trace()
+        # import ipdb; ipdb.set_trace()
         # ipdb > len(eval_pred.predictions)       7
         # ipdb > len(eval_pred.predictions[0])    512
         # ipdb > len(eval_pred.label_ids)         7
