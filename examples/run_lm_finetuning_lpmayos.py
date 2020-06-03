@@ -727,8 +727,11 @@ def main():
                 # lpmayos note: we copy the weights of the checkpoint model into bert-base-cased
                 # so we have the pretrained specific LM weights ready, but the standard BERT model weights from the checkpoint
                 logger.info('loading into pretrained model wieghts from %s' % checkpoint)
-                model_to_copy_from = model_class.from_pretrained(checkpoint)
+                model_to_copy_from = torch.load(checkpoint + '/pytorch_model.bin')
+                # model_to_copy_from = model_class.from_pretrained(checkpoint)
+
                 model.load_state_dict(model_to_copy_from.state_dict())
+                model.eval()
 
                 model.to(args.device)
                 result = evaluate(args, model, tokenizer, prefix=prefix)
@@ -739,33 +742,33 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
+    main()
 
-    config_class, model_class, tokenizer_class = MODEL_CLASSES['bert']
-
-    config = config_class.from_pretrained('bert-base-cased',
-        cache_dir=None,
-    )
-
-    model = model_class.from_pretrained(
-        'bert-base-cased',
-        from_tf=bool(".ckpt" in 'bert-base-cased',),
-        config=config,
-        cache_dir=None,
-    )
-
-
-    checkpoint = '/homedtic/lperez/transformers/lpmayos_experiments/bert_base_cased_finetuned_parsing_ptb_sd/run1/results_parsing/checkpoint-960'
-    model_parsing = model_class.from_pretrained(checkpoint)
-
-    print('1111111111111111111111111111111111111111111111')
-    print(model)
-    print(model.state_dict())
-    print('2222222222222222222222222222222222222222222222')
-    print(model_parsing)
-    print(model_parsing.state_dict())
-
-    model.load_state_dict(model_parsing.state_dict())
-
-    print('333333333333333333333333333333333333333333333')
-    print(model.state_dict())
+    # config_class, model_class, tokenizer_class = MODEL_CLASSES['bert']
+    #
+    # config = config_class.from_pretrained('bert-base-cased',
+    #     cache_dir=None,
+    # )
+    #
+    # model = model_class.from_pretrained(
+    #     'bert-base-cased',
+    #     from_tf=bool(".ckpt" in 'bert-base-cased',),
+    #     config=config,
+    #     cache_dir=None,
+    # )
+    #
+    #
+    # checkpoint = '/homedtic/lperez/transformers/lpmayos_experiments/bert_base_cased_finetuned_parsing_ptb_sd/run1/results_parsing/checkpoint-960'
+    # model_parsing = model_class.from_pretrained(checkpoint)
+    #
+    # print('1111111111111111111111111111111111111111111111')
+    # print(model)
+    # print(model.state_dict())
+    # print('2222222222222222222222222222222222222222222222')
+    # print(model_parsing)
+    # print(model_parsing.state_dict())
+    #
+    # model.load_state_dict(model_parsing.state_dict())
+    #
+    # print('333333333333333333333333333333333333333333333')
+    # print(model.state_dict())
