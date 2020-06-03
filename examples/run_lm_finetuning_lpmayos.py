@@ -456,12 +456,6 @@ def main():
     )
 
     parser.add_argument(
-        "--model_to_copy_from",
-        type=str,
-        help="a BERT model from which we'll copy weight into bert-base-cased.",
-    )
-
-    parser.add_argument(
         "--mlm", action="store_true", help="Train with masked-language modeling loss instead of language modeling."
     )
     parser.add_argument(
@@ -656,23 +650,6 @@ def main():
         config=config,
         cache_dir=args.cache_dir if args.cache_dir else None,
     )
-
-    # note lpmayos: after loading a standard BERT model, we attempt to copy to it the weights of another model (i.e. a BERT for parsing model)
-
-    print("Copying weights from %s into %s" % (args.model_to_copy_from, args.model_name_or_path))
-
-    config_of_model_to_copy_from = config_class.from_pretrained(
-        args.config_name if args.config_name else args.model_to_copy_from,
-        cache_dir=args.cache_dir if args.cache_dir else None,
-    )
-    model_to_copy_from = model_class.from_pretrained(
-        args.model_to_copy_from,
-        from_tf=bool(".ckpt" in args.model_to_copy_from),
-        config=config_of_model_to_copy_from,
-        cache_dir=args.cache_dir if args.cache_dir else None,
-    )
-    model.load_state_dict(model_to_copy_from.state_dict())
-
     model.to(args.device)
 
     if args.local_rank == 0:
@@ -747,7 +724,12 @@ def main():
                 global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
                 prefix = checkpoint.split("/")[-1] if checkpoint.find("checkpoint") != -1 else ""
 
-                model = model_class.from_pretrained(checkpoint)
+                # lpmayos note: we copy the weights of the checkpoint model into bert-base-cased
+                # so we have the pretrained specific LM weights ready, but the standard BERT model weights from the checkpoint
+                print('loading into pretrained model wieghts from %s' % checkpoint)
+                model_to_copy_from = model_class.from_pretrained(checkpoint)
+                model.load_state_dict(model_to_copy_from.state_dict())
+
                 model.to(args.device)
                 result = evaluate(args, model, tokenizer, prefix=prefix)
                 result = dict((k + "_{}".format(global_step), v) for k, v in result.items())
