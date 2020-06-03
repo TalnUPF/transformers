@@ -739,4 +739,20 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+
+    config_class, model_class, tokenizer_class = MODEL_CLASSES['bert']
+
+    model = model_class.from_pretrained(
+        'bert-base-cased',
+        from_tf=bool(".ckpt" in 'bert-base-cased',),
+        config=config,
+        cache_dir=None,
+    )
+
+    import ipdb; ipdb.set_trace()
+
+    checkpoint = '/homedtic/lperez/transformers/lpmayos_experiments/bert_base_cased_finetuned_parsing_ptb_sd/run1/results_parsing/checkpoint-960'
+    model_parsing = model_class.from_pretrained(checkpoint)
+
+    model.load_state_dict(model_parsing.state_dict())
