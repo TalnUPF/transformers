@@ -726,7 +726,7 @@ def main():
 
                 # lpmayos note: we copy the weights of the checkpoint model into bert-base-cased
                 # so we have the pretrained specific LM weights ready, but the standard BERT model weights from the checkpoint
-                print('loading into pretrained model wieghts from %s' % checkpoint)
+                logger.info('loading into pretrained model wieghts from %s' % checkpoint)
                 model_to_copy_from = model_class.from_pretrained(checkpoint)
                 model.load_state_dict(model_to_copy_from.state_dict())
 
