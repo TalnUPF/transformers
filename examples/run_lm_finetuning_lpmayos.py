@@ -730,7 +730,7 @@ def main():
                 model_to_copy_from = torch.load(checkpoint + '/pytorch_model.bin')
                 # model_to_copy_from = model_class.from_pretrained(checkpoint)
 
-                model.load_state_dict(model_to_copy_from)  # .state_dict())
+                model.load_state_dict(model_to_copy_from, strict=False)  # .state_dict())
                 model.eval()
 
                 model.to(args.device)
