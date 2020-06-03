@@ -241,7 +241,7 @@ def main():
         # ipdb > len(eval_pred.label_ids)         7
         # ipdb > len(eval_pred.label_ids[0])      512
 
-        preds = np.argmax(eval_pred.predictions, axis=1)
+        preds = np.argmax(eval_pred.predictions, axis=2)
         return {"acc": simple_accuracy(preds, eval_pred.label_ids)}
 
     # Initialize our Trainer
